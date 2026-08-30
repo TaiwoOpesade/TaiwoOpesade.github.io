@@ -707,14 +707,15 @@
     const suffix = el.dataset.suffix || '';
     el.dataset.done = '1';
     if (!animationsOn) { el.textContent = target + suffix; return; }
-    let current = 0;
-    const step = Math.max(1, Math.ceil(target / 50));
-    const tick = () => {
-      current = Math.min(target, current + step);
-      el.textContent = current + suffix;
-      if (current < target) requestAnimationFrame(tick);
+    const duration = 1200;
+    const start = performance.now();
+    const tick = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const current = Math.floor(target * progress);
+      el.textContent = (progress === 1 ? target : current) + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
     };
-    tick();
+    requestAnimationFrame(tick);
   };
   const counterObs = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting && !e.target.dataset.done) { animateCounter(e.target); counterObs.unobserve(e.target); } });
